@@ -1,0 +1,16 @@
+---
+
+configured_obs:
+    - ch
+    - mx
+
+ob_data:
+    ch:
+      apache:
+        http_port: 80
+        domain: chile.com
+
+    mx:
+      apache:
+        http_port: 81
+        domain: mexico.com

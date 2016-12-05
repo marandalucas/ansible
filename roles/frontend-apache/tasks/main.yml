@@ -1,0 +1,122 @@
+---
+- hosts: apache
+  sudo: yes
+
+  vars:
+    http_port: 80
+    domain: example.com
+
+  tasks:
+
+- name: be sure libselinux-python is installed
+  yum: name=libselinux-python
+       state=present
+       ignore_errors: True
+
+- name: Configure dns
+  template: src=resolv
+            dest=/etc/resolv.conf
+            mode=0644
+            owner=root
+            group=root
+
+- name: Configure hosts files
+  template: src=hosts
+            dest=/etc/hosts
+            mode=0644
+            owner=root
+            group=root
+
+- name: Configure yum repo
+  template: src=yum.conf
+            dest=/etc/yum.conf
+            mode=0644
+            owner=root
+            group=root
+
+- name: Ensure all base packages are updated
+  yum:
+    name: "*"
+    state: "latest"
+
+- name: Disable CentOS services from boot startup
+  service: name={{ item }}
+           enabled=no
+  with_items:
+      - avahi-daemon
+      - firewalld
+      - chronyd
+
+- name: Ensure some base packages are updated
+  yum:  name={{ item }}
+        state=present
+  with_items:
+      - ntp
+      - iptables-services
+      - wget
+      - net-tools
+
+- name: Configure ntp
+  template: src=ntp
+            dest=/etc/ntp.conf
+            mode=0644
+            owner=root
+            group=root
+
+- name: Set UTC date
+  command: timedatectl set-timezone UTC
+
+- name: Delete requiretty from sudoers to be able to use systemd
+  lineinfile: dest=/etc/sudoers
+              state=absent
+              line="Defaults    requiretty"
+
+- name: Ensure some services are started and enabled
+  service:  name={{ item.service }}
+            enabled={{ item.enabled }}
+            state={{ item.state }}
+  with_items:
+      - { service: 'ntpd', enabled: 'yes', state: 'started' }
+      - { service: 'iptables', enabled: 'yes', state: 'stopped' }
+
+
+
+
+
+    - name: install packages
+      apt: name={{ item }} update_cache=yes state=latest
+      with_items:
+        - apache2
+        - git
+
+    - name: enabled mod_rewrite
+      apache2_module: name=rewrite state=present
+      notify:
+        - restart apache2
+
+    - name: apache2 listen on port {{ http_port }}
+      lineinfile: dest=/etc/apache2/ports.conf regexp="^Listen " line="Listen {{ http_port }}" state=present
+      notify:
+        - restart apache2
+
+    - name: apache2 virtualhost on port {{ http_port }}
+      lineinfile: dest=/etc/apache2/sites-available/000-default.conf regexp="^<VirtualHost \*:" line="<VirtualHost *:{{ http_port }}>"
+      notify:
+        - restart apache2
+
+    - name: create virtual host file
+      template: src=virtualhost.conf dest=/etc/apache2/sites-available/{{ domain }}.conf
+
+    - name: a2ensite {{ domain }}
+      command: a2ensite {{ domain }}
+      args:
+        creates: /etc/apache2/sites-enabled/{{ domain }}.conf
+      notify:
+        - restart apache2
+
+    - name: clone basic html template
+      git: repo=https://github.com/do-community/ansible-apache-tutorial.git dest=/var/www/example.com update=no
+
+  handlers:
+    - name: restart apache2
+      service: name=apache2 state=restarted

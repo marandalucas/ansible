@@ -1,0 +1,3 @@
+[frontend-apache]
+192.168.221.101 ansible_ssh_user=vagrant
+192.168.221.102 ansible_ssh_user=vagrant
