@@ -1,3 +1,4 @@
+
 ---
 
 configured_obs:
@@ -14,3 +15,36 @@ ob_data:
       apache:
         http_port: 81
         domain: mexico.com
+
+######################## GLOBAL PARAMETER IN ALL OBS #############################
+hosts_backend:
+    - '127.0.0.1   localhost'
+    - '::1         localhost'
+    - '172.0.0.1'
+    - '192.168.221.101 br-fe-01'
+    - '192.168.221.102 ch-fe-01'
+
+hosts_frontend:
+    - '127.0.0.1   localhost'
+    - '::1         localhost'
+    - '192.168.221.101 br-fe-01'
+    - '192.168.221.102 ch-fe-01'
+
+dns:
+    - '10.0.2.3'
+
+ntp:
+    - '0.debian.pool.ntp.org iburst'
+    - '1.debian.pool.ntp.org iburst'
+    - '2.debian.pool.ntp.org iburst'
+    - '3.debian.pool.ntp.org iburst'
+
+proxy:
+    package: 'proxy.net:80'
+    csb_http: '172.25.1.243:8441'
+    csb_https: '172.25.1.243:6309'
+    mail: ''
+
+percona_cluster:
+    master: '172.25.12.39'
+    slave: '172.25.12.41'
