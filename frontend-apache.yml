@@ -1,0 +1,5 @@
+---
+- hosts: frontend-apache
+  sudo: yes
+  roles:
+    - frontend-apache
