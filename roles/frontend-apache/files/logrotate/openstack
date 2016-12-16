@@ -1,9 +1,0 @@
-/var/log/vs/openstack.log {
-    daily
-    dateext
-    rotate 7
-    copytruncate
-    compress
-    missingok
-    ifempty
-}
