@@ -3,7 +3,6 @@ Proyecto de Ansible para realizar despliegue de servidores web - APACHE2
 En este ejemplo usamos por paises (Brasil y Chile), configurando unas variables para que se configure el Apache según el país que queramos.
 
 Primero levantaremos nuestras maquinas de pruebas con el siguiente VagrantFile que hemos realizado:
-
 https://github.com/marandalucas/vagrant
 
   $vagrant up
