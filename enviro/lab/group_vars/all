@@ -11,10 +11,10 @@ ob_data:
         http_port: 80
         domain: chile.com
 
-    mx:
+    br:
       apache:
         http_port: 81
-        domain: mexico.com
+        domain: brazil.com
 
 ######################## GLOBAL PARAMETER IN ALL OBS #############################
 hosts_backend:

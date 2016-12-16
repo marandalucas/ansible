@@ -5,8 +5,9 @@
      - apache2
      - git
      - ntp
-     - iptables
+     - iptables-persistent
      - wget
+     - gcc
   tags: configuration
 
 - name: Configure dns
@@ -31,6 +32,13 @@
             mode=0644
             owner=root
             group=root
+  tags: configuration
+
+- name: Configure iptables for node services
+  copy: src=iptables/iptables
+        dest=/etc/iptables/rules.v4
+        owner=root
+        group=root
   tags: configuration
 
 - name: Disable Debian services from boot startup
@@ -75,6 +83,29 @@
     - restart apache2
   tags: configuration
 
+- name: Configure logrotate for services
+  copy: src=logrotate/{{ item }}
+        dest=/etc/logrotate.d/
+        owner=root
+        group=root
+  with_items:
+      - apache2
+  tags: configuration
+
+- name: Make sure log dir exists and it is property of the run user
+  file: path=/var/log/apache2
+        state=directory
+        owner=root
+        group=root
+        mode=775
+  tags: configuration
+
+- name: Make Virtualhost mutable
+  shell: chattr -i /etc/apache2/sites-available/virtualhost.conf
+  changed_when: False
+#  when: config_status.stat.exists == True
+  tags: configuration
+
 - name: Configure virtualhost of Brazil
   template: src=virtualhost.conf
             dest=/etc/apache2/sites-available/
@@ -82,7 +113,7 @@
             owner=root
             group=root
   with_items: br
-  notify: restart apche2
+  notify: restart apache2
   tags: brazil
 
 - name: Configure virtualhost of Chile
@@ -95,15 +126,30 @@
   notify: restart apache2
   tags: chile
 
-#- name: apache2 listen on port {{ http_port }}
-#  lineinfile: dest=/etc/apache2/ports.conf regexp="^Listen " line="Listen {{ http_port }}" state=present
-#  notify:
-#    - restart apache2
-#
-#- name: apache2 virtualhost on port {{ http_port }}
-#  lineinfile: dest=/etc/apache2/sites-available/000-default.conf regexp="^<VirtualHost \*:" line="<VirtualHost *:{{ http_port }}>"
-#  notify:
-#    - restart apache2
+- name: Make virtualhost inmutable
+  shell: chattr +i /etc/apache2/sites-available/virtualhost.conf
+  changed_when: False
+  tags: configuration
+
+- name: Configure ports of Brazil
+  template: src=ports.conf
+            dest=/etc/apache2/ports.conf
+            mode=0644
+            owner=root
+            group=root
+  with_items: br
+  notify: restart apache2
+  tags: brazil
+
+- name: Configure ports of Chile
+  template: src=ports.conf
+            dest=/etc/apache2/ports.conf
+            mode=0644
+            owner=root
+            group=root
+  with_items: ch
+  notify: restart apache2
+  tags: chile
 
 - name: a2ensite virtualhost.conf
   command: a2ensite virtualhost.conf
