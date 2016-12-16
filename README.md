@@ -9,6 +9,6 @@ https://github.com/marandalucas/vagrant
 
 Ejecutaremos los siguientes comandos para el despliegue:
 
-  $ansible-playbook frontend-apache.yml -i enviro/lab/hosts --tags configuration,chile --limit chile
+  $ansible-playbook frontend-apache.yml -i enviro/pro/hosts --tags configuration,chile --limit chile
 
-  $ansible-playbook frontend-apache.yml -i enviro/lab/hosts --tags configuration,brazil --limit brazil
+  $ansible-playbook frontend-apache.yml -i enviro/pro/hosts --tags configuration,brazil --limit brazil
